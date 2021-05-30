@@ -1,0 +1,14 @@
+{
+  "name": "digital-ocean-temp-run",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "author": "Jean-Luc Martin <jl.martin1990@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "digitalocean": "^1.2.1",
+    "promise-retry": "^2.0.1",
+    "readjson": "^2.2.2",
+    "ssh-fingerprint": "^0.0.1"
+  }
+}
