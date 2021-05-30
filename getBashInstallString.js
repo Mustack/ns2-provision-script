@@ -1,11 +1,15 @@
 export function getBashInstallString({
   ip,
   dropletId,
+  delayInSeconds,
   STEAM_USERNAME,
   STEAM_PASSWORD,
   NS2_SERVER_PASSWORD,
+  DIGITAL_OCEAN_TOKEN,
 }) {
   return `ssh root@${ip} -o StrictHostKeyChecking=no << EOF 
+    (sleep ${delayInSeconds}; curl -X DELETE -H "Content-Type: application/json" -H "Authorization: Bearer ${DIGITAL_OCEAN_TOKEN}" "https://api.digitalocean.com/v2/droplets/${dropletId}")&  
+    
     sudo su
     
     dpkg --add-architecture i386; apt update; apt install -y curl wget file tar bzip2 gzip unzip bsdmainutils python util-linux ca-certificates binutils bc jq tmux netcat lib32gcc1 lib32stdc++6 libsdl2-2.0-0:i386 speex:i386 libtbb2 python3 cpio software-properties-common iproute2
@@ -35,6 +39,5 @@ export function getBashInstallString({
     
     ./ns2server auto-install
     ./ns2server start
-    EOF
   `;
 }
