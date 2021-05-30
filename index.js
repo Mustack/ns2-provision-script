@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import digitalOcean from "digitalocean";
 import fs from "fs";
 import readjson from "readjson";
@@ -120,13 +121,18 @@ function remotelyInstallNs2ServerOnDropletAndDestroyAfterDelay(
 }
 
 try {
+  const hoursUntilDelete = process.argv[2];
+  if (!hoursUntilDelete || isNaN(hoursUntilDelete)) {
+    throw `No param provided for hoursUntilDelete. Usage: 'node ./indexed.js 6'`;
+  }
+
   const droplet = await createNewDroplet();
   console.log("Waiting a bit before attempting to SSH");
   await delay(20000); // wait a few seconds for the SSH server to be ready
   // const [droplet] = await client.droplets.list();
   await remotelyInstallNs2ServerOnDropletAndDestroyAfterDelay(
     droplet,
-    3600 / 2
+    hoursUntilDelete
   );
 
   console.log("Use the following command to connect:");
