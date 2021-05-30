@@ -7,7 +7,7 @@ export function getBashInstallString({
   NS2_SERVER_PASSWORD,
   DIGITAL_OCEAN_TOKEN,
 }) {
-  return `ssh root@${ip} -o StrictHostKeyChecking=no -t << EOF 
+  return `ssh root@${ip} -o StrictHostKeyChecking=no << EOF 
     tmux new -d -s deletemux "sleep ${delayInSeconds}; curl -X DELETE -H "Content-Type: application/json" -H "Authorization: Bearer ${DIGITAL_OCEAN_TOKEN}" "https://api.digitalocean.com/v2/droplets/${dropletId}""  
     
     sudo su
@@ -37,7 +37,7 @@ export function getBashInstallString({
     
     ./ns2server auto-install
 
-    echo 'startparameters="-name "\$\{servername\}" -port "\${port}" -webadmin -webdomain "\${ip}" -webuser "\${webadminuser}" -webpassword "\${webadminpass}" -webport "\${webadminport}" -map "\${defaultmap}" -limit "\${maxplayers}" -config_path "\${servercfgdir}" -logdir "\${gamelogdir}" -modstorage "\${modstoragedir}" -mods "\${mods}" -password "${NS2_SERVER_PASSWORD}""' > /home/ns2server/lgsm/config-lgsm/ns2server/ns2server.cfg
+    echo 'startparameters="-name "\\\${servername}" -port "\\\${port}" -webadmin -webdomain "\\\${ip}" -webuser "\\\${webadminuser}" -webpassword "\\\${webadminpass}" -webport "\\\${webadminport}" -map "\\\${defaultmap}" -limit "\\\${maxplayers}" -config_path "\\\${servercfgdir}" -logdir "\\\${gamelogdir}" -modstorage "\\\${modstoragedir}" -mods "\\\${mods}" -password "${NS2_SERVER_PASSWORD}""' > /home/ns2server/lgsm/config-lgsm/ns2server/ns2server.cfg
     
     ./ns2server start
   `;

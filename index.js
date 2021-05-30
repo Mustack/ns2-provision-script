@@ -4,6 +4,8 @@ import readjson from "readjson";
 import retry from "promise-retry";
 import sshFingerprint from "ssh-fingerprint";
 import childProcess from "child_process";
+import delay from "delay";
+import os from "os";
 
 import { getBashInstallString } from "./getBashInstallString.js";
 
@@ -19,6 +21,13 @@ const client = digitalOcean.client(DIGITAL_OCEAN_TOKEN);
 
 const SIZE_CHEAPEST = "s-1vcpu-1gb"; //useful for debugging
 const SIZE_CPU_OPTIMIZED = "c-2";
+
+function getPublicIP(droplet) {
+  const networkInterface = droplet.networks.v4.find(
+    (networkInterface) => networkInterface.type === "public"
+  );
+  return networkInterface.ip_address;
+}
 
 function waitForDropletToBeStarted(dropletId) {
   return retry(
@@ -59,7 +68,7 @@ async function createFromSnapshot() {
 }
 
 async function createNewDroplet() {
-  const sshKey = fs.readFileSync("/home/mustack/.ssh/id_rsa.pub", "utf-8");
+  const sshKey = fs.readFileSync(os.homedir() + "/.ssh/id_rsa.pub", "utf-8");
   const sshKeyFingerprint = sshFingerprint(sshKey);
 
   try {
@@ -76,30 +85,29 @@ async function createNewDroplet() {
     name: "ns2-server",
     region: "nyc3",
     image: "ubuntu-20-04-x64",
-    size: SIZE_CHEAPEST,
+    size: SIZE_CPU_OPTIMIZED,
     ssh_keys: [sshKeyFingerprint],
   });
 
   return waitForDropletToBeStarted(droplet.id);
 }
 
-function remotelyInstallNs2ServerOnDroplet(droplet) {
-  const networkInterface = droplet.networks.v4.find(
-    (networkInterface) => networkInterface.type === "public"
-  );
-
-  const ip = networkInterface.ip_address;
-
-  console.log("Droplet created with ip", ip);
+function remotelyInstallNs2ServerOnDropletAndDestroyAfterDelay(
+  droplet,
+  delayInSeconds
+) {
+  const ip = getPublicIP(droplet);
 
   return new Promise((resolve) => {
     const childProcess = spawn(
       getBashInstallString({
         ip,
         dropletId: droplet.id,
+        delayInSeconds,
         STEAM_USERNAME,
         STEAM_PASSWORD,
         NS2_SERVER_PASSWORD,
+        DIGITAL_OCEAN_TOKEN,
       }),
       { stdio: "inherit", shell: true }
     );
@@ -112,11 +120,17 @@ function remotelyInstallNs2ServerOnDroplet(droplet) {
 }
 
 try {
-  // const droplet = await createNewDroplet();
-  const [droplet] = await client.droplets.list();
-  await remotelyInstallNs2ServerOnDroplet(droplet);
+  const droplet = await createNewDroplet();
+  console.log("Waiting a bit before attempting to SSH");
+  await delay(20000); // wait a few seconds for the SSH server to be ready
+  // const [droplet] = await client.droplets.list();
+  await remotelyInstallNs2ServerOnDropletAndDestroyAfterDelay(
+    droplet,
+    3600 / 2
+  );
 
-  console.log("done");
+  console.log("Use the following command to connect:");
+  console.log(`connect ${getPublicIP(droplet)}:27015`);
 } catch (e) {
   console.error(e);
 }

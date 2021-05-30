@@ -6,6 +6,7 @@
   "author": "Jean-Luc Martin <jl.martin1990@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "delay": "^5.0.0",
     "digitalocean": "^1.2.1",
     "promise-retry": "^2.0.1",
     "readjson": "^2.2.2",
