@@ -8,7 +8,7 @@ export function getBashInstallString({
   DIGITAL_OCEAN_TOKEN,
 }) {
   return `ssh root@${ip} -o StrictHostKeyChecking=no << EOF 
-    tmux new -d -s deletemux "sleep ${delayInSeconds}; curl -X DELETE -H "Content-Type: application/json" -H "Authorization: Bearer ${DIGITAL_OCEAN_TOKEN}" "https://api.digitalocean.com/v2/droplets/${dropletId}""  
+    nohup bash -c 'sleep ${delayInSeconds}; curl -X DELETE -H "Content-Type: application/json" -H "Authorization: Bearer ${DIGITAL_OCEAN_TOKEN}" "https://api.digitalocean.com/v2/droplets/${dropletId}"' 1>/dev/null 2>/dev/null &
     
     sudo su
     

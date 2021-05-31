@@ -95,7 +95,7 @@ async function createNewDroplet() {
 
 function remotelyInstallNs2ServerOnDropletAndDestroyAfterDelay(
   droplet,
-  delayInSeconds
+  hoursUntilDelete
 ) {
   const ip = getPublicIP(droplet);
 
@@ -104,7 +104,7 @@ function remotelyInstallNs2ServerOnDropletAndDestroyAfterDelay(
       getBashInstallString({
         ip,
         dropletId: droplet.id,
-        delayInSeconds,
+        delayInSeconds: hoursUntilDelete * 3600,
         STEAM_USERNAME,
         STEAM_PASSWORD,
         NS2_SERVER_PASSWORD,
@@ -129,7 +129,10 @@ try {
   const droplet = await createNewDroplet();
   console.log("Waiting a bit before attempting to SSH");
   await delay(20000); // wait a few seconds for the SSH server to be ready
+
+  // Useful for debugging. Use this and comment out the creation step before for faster test runs.
   // const [droplet] = await client.droplets.list();
+
   await remotelyInstallNs2ServerOnDropletAndDestroyAfterDelay(
     droplet,
     hoursUntilDelete
